@@ -353,6 +353,8 @@ footer summary{cursor:pointer;color:#DAD7E6}
     <div class="contact-grid">
       <!-- Formulaire -->
       <form id="contactForm" novalidate>
+        <input type="hidden" name="access_key" value="fd8db4f8-f474-4feb-8952-b6fbdb8edc57">
+        <input type="hidden" name="subject" value="Nouveau message · Communic-action">
         <div class="row">
           <div class="field">
             <label for="nom">Nom et prénom</label>
@@ -428,7 +430,7 @@ footer summary{cursor:pointer;color:#DAD7E6}
 const CONFIG = {
   // URL qui reçoit le formulaire (Cloudflare Pages Function /api/contact, Formspree, Web3Forms…).
   // Vide = mode démonstration : rien n'est envoyé.
-  formEndpoint: "",
+  formEndpoint: "https://api.web3forms.com/submit",
   places: {
     cotellerie: { q: "Prieuré de la Cotellerie, 53170 Bazougers", label: "Prieuré de la Cotellerie, Bazougers (Mayenne)" },
     paimpol:    { q: "Temple protestant, rue du Professeur Jean Renaud, 22500 Paimpol", label: "Temple de Paimpol, rue du Professeur Jean Renaud" }
