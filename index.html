@@ -139,7 +139,8 @@ section.alt{background:var(--cream-2)}
 .about .media .ph{color:#E7E5EF;border-color:rgba(255,255,255,.3)}
 
 /* Contact */
-.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+.contact-grid{display:flex;justify-content:center}
+.contact-form{width:100%;max-width:560px}
 form{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:32px}
 .field{margin-bottom:1.15rem}
 label{display:block;font-weight:600;margin-bottom:.35rem;font-size:.98rem;color:var(--night)}
@@ -155,17 +156,6 @@ textarea{min-height:150px;resize:vertical}
 .status.err{display:block;background:#FBE9E4;color:#7B2E1A;border:1px solid #EDBFB2}
 .status.info{display:block;background:var(--gold-soft);color:#6A480C;border:1px solid #EBCB8A}
 
-/* Carte (chargée au clic : respect de la vie privée) */
-.map-box{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-.map-tabs{display:flex;border-bottom:1px solid var(--line)}
-.map-tabs button{flex:1;padding:.95rem .6rem;border:0;background:var(--cream);font:600 .98rem var(--sans);color:var(--muted);cursor:pointer;border-bottom:3px solid transparent}
-.map-tabs button[aria-selected="true"]{background:#fff;color:var(--night);border-bottom-color:var(--gold)}
-.map-view{position:relative;aspect-ratio:4/3.3;background:linear-gradient(135deg,#E7DFEE,#F7E8C6)}
-.map-view iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.map-load{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:1rem;text-align:center;padding:1.5rem}
-.map-load p{margin:0;color:var(--night-2);max-width:32ch;font-size:.98rem}
-.map-foot{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.9rem 1.2rem;font-size:.95rem;border-top:1px solid var(--line)}
-
 /* Pied de page */
 footer{background:#1D2539;color:#B9BDCB;padding:44px 0 36px;font-size:.95rem}
 footer .row2{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;align-items:center}
@@ -177,7 +167,7 @@ footer summary{cursor:pointer;color:#DAD7E6}
 /* ---------- Responsive ---------- */
 @media (max-width:900px){
   section{padding:64px 0}
-  .grid-2,.book-grid,.about-grid,.contact-grid{grid-template-columns:1fr;gap:32px}
+  .grid-2,.book-grid,.about-grid{grid-template-columns:1fr;gap:32px}
   .book-grid .media.book{order:-1}
   .hero .wrap{padding:84px 0 150px}
   .row{grid-template-columns:1fr}
@@ -352,7 +342,7 @@ footer summary{cursor:pointer;color:#DAD7E6}
 
     <div class="contact-grid">
       <!-- Formulaire -->
-      <form id="contactForm" novalidate>
+      <form id="contactForm" class="contact-form" novalidate>
         <input type="hidden" name="access_key" value="8ce18c77-7f94-4642-a21f-dd173f4082f9">
         <input type="hidden" name="subject" value="Nouveau message · Communic-action">
         <div class="row">
@@ -386,26 +376,6 @@ footer summary{cursor:pointer;color:#DAD7E6}
         <button class="btn btn-gold" type="submit" id="submitBtn">Envoyer le message</button>
         <div class="status" id="formStatus" role="status" aria-live="polite"></div>
       </form>
-
-      <!-- Carte -->
-      <div>
-        <div class="map-box">
-          <div class="map-tabs" role="tablist" aria-label="Lieux">
-            <button role="tab" id="tab-cotellerie" aria-selected="true" data-place="cotellerie">La Cotellerie · Laval</button>
-            <button role="tab" id="tab-paimpol" aria-selected="false" data-place="paimpol">Temple de Paimpol</button>
-          </div>
-          <div class="map-view" id="mapView" role="tabpanel" aria-live="polite">
-            <div class="map-load" id="mapLoad">
-              <p>La carte est fournie par Google Maps. Elle ne se charge qu'à votre demande.</p>
-              <button class="btn btn-dark" id="mapBtn" type="button">Afficher la carte</button>
-            </div>
-          </div>
-          <div class="map-foot">
-            <span id="mapLabel">Prieuré de la Cotellerie, Bazougers (Mayenne)</span>
-            <a id="mapLink" href="#" target="_blank" rel="noopener">Ouvrir dans Google Maps ↗</a>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </section>
@@ -430,11 +400,7 @@ footer summary{cursor:pointer;color:#DAD7E6}
 const CONFIG = {
   // URL qui reçoit le formulaire (Cloudflare Pages Function /api/contact, Formspree, Web3Forms…).
   // Vide = mode démonstration : rien n'est envoyé.
-  formEndpoint: "https://api.web3forms.com/submit",
-  places: {
-    cotellerie: { q: "Prieuré de la Cotellerie, 53170 Bazougers", label: "Prieuré de la Cotellerie, Bazougers (Mayenne)" },
-    paimpol:    { q: "Temple protestant, rue du Professeur Jean Renaud, 22500 Paimpol", label: "Temple de Paimpol, rue du Professeur Jean Renaud" }
-  }
+  formEndpoint: "https://api.web3forms.com/submit"
 };
 
 /* ===== Menu mobile ===== */
@@ -444,28 +410,6 @@ burger.addEventListener('click', () => {
   burger.setAttribute('aria-expanded', open);
 });
 menu.addEventListener('click', e => { if (e.target.closest('a')) { menu.classList.remove('open'); burger.setAttribute('aria-expanded', false); } });
-
-/* ===== Carte : chargée au clic ===== */
-const mapView = document.getElementById('mapView'), mapLabel = document.getElementById('mapLabel'), mapLink = document.getElementById('mapLink');
-let currentPlace = 'cotellerie', mapLoaded = false;
-function renderMapLinks(){
-  const p = CONFIG.places[currentPlace];
-  mapLabel.textContent = p.label;
-  mapLink.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.q);
-}
-function loadMap(){
-  const p = CONFIG.places[currentPlace];
-  mapView.innerHTML = '<iframe title="Carte : ' + p.label + '" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=' + encodeURIComponent(p.q) + '&hl=fr&z=14&output=embed"></iframe>';
-  mapLoaded = true;
-}
-document.getElementById('mapBtn').addEventListener('click', loadMap);
-document.querySelectorAll('.map-tabs button').forEach(btn => btn.addEventListener('click', () => {
-  currentPlace = btn.dataset.place;
-  document.querySelectorAll('.map-tabs button').forEach(b => b.setAttribute('aria-selected', b === btn));
-  renderMapLinks();
-  if (mapLoaded) loadMap();
-}));
-renderMapLinks();
 
 /* ===== Formulaire ===== */
 const form = document.getElementById('contactForm'), statusBox = document.getElementById('formStatus'), submitBtn = document.getElementById('submitBtn');
